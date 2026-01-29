@@ -25,14 +25,21 @@ export default async function pastes(req: NextApiRequest, res: NextApiResponse) 
   } catch (err: any) {
     if (err instanceof ValidationError) return res.status(400).json({ error: err.message });
     
-    // Log error for debugging (only in development)
-    if (process.env.NODE_ENV === "development") {
-      console.error("Paste creation error:", err);
+    // Log error for debugging
+    console.error("Paste creation error:", err);
+    
+    // Check if it's a database configuration error
+    const errMessage = err?.message || "";
+    if (errMessage.includes("Upstash Redis") || errMessage.includes("not configured")) {
+      return res.status(500).json({ 
+        error: "database_not_configured",
+        message: "Upstash Redis is not configured. Please set DB_DRIVER=upstash, UPSTASH_REDIS_REST_URL, and UPSTASH_REDIS_REST_TOKEN environment variables in Vercel."
+      });
     }
     
-    // Return a more helpful error message in development, generic in production
+    // Return generic error in production, detailed in development
     const errorMessage = process.env.NODE_ENV === "development" 
-      ? err?.message || "internal_error"
+      ? errMessage || "internal_error"
       : "internal_error";
     
     return res.status(500).json({ error: errorMessage });
