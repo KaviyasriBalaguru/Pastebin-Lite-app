@@ -28,7 +28,20 @@ function getDriver(): "sqlite" | "upstash" {
   if (driver === "upstash") return "upstash";
   if (driver === "sqlite") return "sqlite";
 
-  // Auto-pick: if Upstash env vars exist, prefer it; otherwise SQLite.
+  // On Vercel (or any serverless), prefer Upstash if env vars exist
+  const isServerless = process.env.VERCEL === "1" || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (isServerless) {
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      return "upstash";
+    }
+    // On serverless without Upstash configured, throw a clear error
+    throw new Error(
+      "Serverless environment detected but Upstash Redis not configured. " +
+      "Please set DB_DRIVER=upstash and UPSTASH_REDIS_REST_URL/UPSTASH_REDIS_REST_TOKEN environment variables."
+    );
+  }
+
+  // Auto-pick: if Upstash env vars exist, prefer it; otherwise SQLite (for local dev).
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) return "upstash";
   return "sqlite";
 }
@@ -125,7 +138,17 @@ function createSqliteAdapter(): PasteDb {
 function getUpstashRedis(): Redis {
   const g = globalThis as GlobalCache;
   if (g.__pastebin_upstash__) return g.__pastebin_upstash__;
-  const client = Redis.fromEnv();
+  
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  
+  if (!url || !token) {
+    throw new Error(
+      "Upstash Redis configuration missing. Please set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables."
+    );
+  }
+  
+  const client = new Redis({ url, token });
   g.__pastebin_upstash__ = client;
   return client;
 }

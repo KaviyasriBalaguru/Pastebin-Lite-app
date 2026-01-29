@@ -10,20 +10,28 @@ export const getServerSideProps: GetServerSideProps<{
   remaining_views: number | null;
   expires_at: string | null;
 }> = async (ctx) => {
-  const id = ctx.params?.id;
-  if (typeof id !== "string") return { notFound: true };
+  try {
+    const id = ctx.params?.id;
+    if (typeof id !== "string") return { notFound: true };
 
-  const now_ms = nowMsFromHeaders(ctx.req.headers as any);
-  const db = getPasteDb();
-  const result = await consumePaste(db, id, now_ms);
-  if (!result) return { notFound: true };
+    const now_ms = nowMsFromHeaders(ctx.req.headers as any);
+    const db = getPasteDb();
+    const result = await consumePaste(db, id, now_ms);
+    if (!result) return { notFound: true };
 
-  return {
-    props: {
-      id,
-      ...result
+    return {
+      props: {
+        id,
+        ...result
+      }
+    };
+  } catch (err) {
+    // Log error in development
+    if (process.env.NODE_ENV === "development") {
+      console.error("Paste view error:", err);
     }
-  };
+    return { notFound: true };
+  }
 };
 
 export default function PasteViewPage({

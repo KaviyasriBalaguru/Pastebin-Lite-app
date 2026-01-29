@@ -24,7 +24,18 @@ export default async function pastes(req: NextApiRequest, res: NextApiResponse) 
     return res.status(201).json({ id, url });
   } catch (err: any) {
     if (err instanceof ValidationError) return res.status(400).json({ error: err.message });
-    return res.status(500).json({ error: "internal_error" });
+    
+    // Log error for debugging (only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Paste creation error:", err);
+    }
+    
+    // Return a more helpful error message in development, generic in production
+    const errorMessage = process.env.NODE_ENV === "development" 
+      ? err?.message || "internal_error"
+      : "internal_error";
+    
+    return res.status(500).json({ error: errorMessage });
   }
 }
 
