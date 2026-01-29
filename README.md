@@ -60,6 +60,54 @@ Tests run end-to-end by starting a Next dev server and calling real HTTP routes:
 npm test
 ```
 
+## Deployment to Vercel
+
+### Prerequisites
+
+1. **Upstash Redis account** (free tier available):
+   - Sign up at https://upstash.com/
+   - Create a Redis database
+   - Copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+
+### Deploy via Vercel Web UI (Recommended)
+
+1. Go to https://vercel.com/new
+2. **Import Git Repository**: Select `KaviyasriBalaguru/Pastebin-Lite-app`
+3. **Configure Project**:
+   - Framework Preset: Next.js (auto-detected)
+   - Root Directory: `./` (default)
+4. **Environment Variables** (add these):
+   - `DB_DRIVER` = `upstash`
+   - `UPSTASH_REDIS_REST_URL` = (your Upstash URL)
+   - `UPSTASH_REDIS_REST_TOKEN` = (your Upstash token)
+5. Click **Deploy**
+
+### Deploy via Vercel CLI
+
+```bash
+# Install Vercel CLI (if not installed)
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy (from project root)
+cd "d:\Paste bin"
+vercel --prod
+```
+
+When prompted, add the environment variables listed above.
+
+### Post-Deployment
+
+After deployment, your app will be available at `https://your-app.vercel.app`
+
+**Test endpoints:**
+- `GET https://your-app.vercel.app/api/healthz`
+- `POST https://your-app.vercel.app/api/pastes`
+- `GET https://your-app.vercel.app/api/pastes/:id`
+- `GET https://your-app.vercel.app/p/:id`
+
 ## Design decisions (high-level)
 
 - **Business logic in `src/lib/pasteService.ts`**: All TTL/view-limit rules live in one place and are used by both JSON APIs and the HTML view page.
