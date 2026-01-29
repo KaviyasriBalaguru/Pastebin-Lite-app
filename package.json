@@ -1,0 +1,32 @@
+{
+  "name": "pastebin-lite",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "cross-env TEST_MODE=1 DB_DRIVER=sqlite vitest --run"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.35.1",
+    "nanoid": "^5.1.2",
+    "next": "^15.1.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.13.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "better-sqlite3": "^11.8.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "^15.1.6",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
