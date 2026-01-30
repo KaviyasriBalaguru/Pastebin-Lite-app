@@ -14,7 +14,7 @@ export default async function pasteById(req: NextApiRequest, res: NextApiRespons
     if (typeof id !== "string") return res.status(404).json({ error: "not_found" });
 
     const now_ms = nowMsFromHeaders(req.headers);
-    const db = getPasteDb();
+    const db = await getPasteDb();
     const result = await consumePaste(db, id, now_ms);
     if (!result) return res.status(404).json({ error: "not_found" });
     return res.status(200).json(result);

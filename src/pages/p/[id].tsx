@@ -15,7 +15,7 @@ export const getServerSideProps: GetServerSideProps<{
     if (typeof id !== "string") return { notFound: true };
 
     const now_ms = nowMsFromHeaders(ctx.req.headers as any);
-    const db = getPasteDb();
+    const db = await getPasteDb();
     const result = await consumePaste(db, id, now_ms);
     if (!result) return { notFound: true };
 

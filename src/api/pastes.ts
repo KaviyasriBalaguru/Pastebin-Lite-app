@@ -3,6 +3,10 @@ import { getPasteDb } from "@/lib/db";
 import { createPaste, validateCreatePasteInput, ValidationError } from "@/lib/pasteService";
 import { nowMsFromHeaders } from "@/lib/time";
 
+export const config = {
+  api: { bodyParser: { sizeLimit: "1mb" } },
+};
+
 function getBaseUrl(req: NextApiRequest): string {
   const proto = (req.headers["x-forwarded-proto"] as string | undefined) ?? "http";
   const host = req.headers["x-forwarded-host"] ?? req.headers.host;
@@ -16,9 +20,10 @@ export default async function pastes(req: NextApiRequest, res: NextApiResponse) 
   }
 
   try {
-    const validated = validateCreatePasteInput(req.body);
+    const body = req.body ?? {};
+    const validated = validateCreatePasteInput(body);
     const now_ms = nowMsFromHeaders(req.headers);
-    const db = getPasteDb();
+    const db = await getPasteDb();
     const { id } = await createPaste(db, validated, now_ms);
     const url = `${getBaseUrl(req)}/p/${id}`;
     return res.status(201).json({ id, url });
