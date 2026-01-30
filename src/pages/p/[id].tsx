@@ -25,11 +25,19 @@ export const getServerSideProps: GetServerSideProps<{
         ...result
       }
     };
-  } catch (err) {
-    // Log error in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("Paste view error:", err);
-    }
+  } catch (err: any) {
+    const errMessage = err?.message || "";
+    const isUpstashAuth =
+      err?.name === "UpstashError" ||
+      errMessage.includes("WRONGPASS") ||
+      errMessage.includes("invalid or missing auth token") ||
+      errMessage.includes("http_unauthorized");
+
+    // Log all errors (Vercel logs are visible in dashboard)
+    console.error("Paste view error:", errMessage || err);
+
+    // If it's an Upstash auth error, we still return 404 to avoid exposing internals
+    // but the error is logged in Vercel Function Logs for debugging
     return { notFound: true };
   }
 };

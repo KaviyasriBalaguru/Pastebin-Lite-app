@@ -19,9 +19,23 @@ export default async function pasteById(req: NextApiRequest, res: NextApiRespons
     if (!result) return res.status(404).json({ error: "not_found" });
     return res.status(200).json(result);
   } catch (err: any) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Paste fetch error:", err);
+    const errMessage = err?.message || "";
+    const isUpstashAuth =
+      err?.name === "UpstashError" ||
+      errMessage.includes("WRONGPASS") ||
+      errMessage.includes("invalid or missing auth token") ||
+      errMessage.includes("http_unauthorized");
+
+    if (isUpstashAuth) {
+      console.error("Paste fetch error (Upstash auth):", errMessage);
+      return res.status(500).json({
+        error: "upstash_auth_failed",
+        message:
+          "Upstash Redis token is invalid. In Vercel, set UPSTASH_REDIS_REST_TOKEN to the default (read-write) token from Upstash Console — not the read-only token. Ensure there are no extra spaces.",
+      });
     }
+
+    console.error("Paste fetch error:", err);
     return res.status(500).json({ error: "internal_error" });
   }
 }
