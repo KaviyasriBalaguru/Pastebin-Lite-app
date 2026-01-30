@@ -24,10 +24,13 @@ This error occurs because **Upstash Redis is not configured** in your Vercel dep
 
 After creating the database:
 
-1. You'll see your database details
-2. Copy these two values:
-   - **UPSTASH_REDIS_REST_URL** (looks like: `https://xxxxx.upstash.io`)
-   - **UPSTASH_REDIS_REST_TOKEN** (a long token string)
+1. Open your database in **Upstash Console** → **REST** tab.
+2. **Important:** Use the **default token** (read-write), **not** the "Read-Only Token".
+   - Leave **"Read-Only Token"** **unchecked** when copying.
+   - The app needs write access to create/update pastes.
+3. Copy these two values **exactly** (no leading/trailing spaces):
+   - **UPSTASH_REDIS_REST_URL** (e.g. `https://good-gelding-38095.upstash.io`)
+   - **UPSTASH_REDIS_REST_TOKEN** (the long token — default, not read-only)
 
 ### **Step 3: Add Environment Variables in Vercel**
 
@@ -89,6 +92,26 @@ After setup, verify these endpoints work:
 ---
 
 ## 🐛 **Troubleshooting**
+
+### "WRONGPASS" or "invalid or missing auth token" (upstash_auth_failed)
+
+This means **UPSTASH_REDIS_REST_TOKEN** in Vercel is wrong:
+
+1. **Use the default token, not read-only**
+   - In Upstash Console → your database → **REST** tab.
+   - Ensure **"Read-Only Token"** is **unchecked**.
+   - Copy the token shown there (the main one, not the read-only one).
+
+2. **No extra spaces**
+   - When pasting into Vercel, don’t add spaces before or after the token.
+
+3. **Update in Vercel and redeploy**
+   - Vercel → Settings → Environment Variables.
+   - Edit **UPSTASH_REDIS_REST_TOKEN** and paste the correct token.
+   - Save, then **Redeploy** (Deployments → ⋯ → Redeploy).
+
+4. **Regenerate token if needed**
+   - In Upstash, you can create a new token if the current one was copied wrong or rotated.
 
 ### Still seeing "internal_error"?
 
